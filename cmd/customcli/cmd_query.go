@@ -17,6 +17,7 @@ import (
 	"github.com/iov-one/weave-starter-kit/x/custom"
 	"github.com/iov-one/weave/orm"
 	"github.com/iov-one/weave/x/cash"
+	"github.com/iov-one/weave/x/countdown"
 	"github.com/iov-one/weave/x/multisig"
 )
 
@@ -120,6 +121,16 @@ var queries = map[string]struct {
 	},
 	"/contracts": {
 		newObj: func() model { return &multisig.Contract{} },
+		decKey: sequenceKey,
+		encID:  numericID,
+	},
+	"/countdown/writes": {
+		newObj: func() model { return &countdown.Write{} },
+		decKey: sequenceKey,
+		encID:  numericID,
+	},
+	"/countdown/lines": {
+		newObj: func() model { return &countdown.Line{} },
 		decKey: sequenceKey,
 		encID:  numericID,
 	},

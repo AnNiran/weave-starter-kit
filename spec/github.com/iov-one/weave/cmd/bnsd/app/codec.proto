@@ -7,10 +7,12 @@ import "gogoproto/gogo.proto";
 import "migration/codec.proto";
 import "x/aswap/codec.proto";
 import "x/cash/codec.proto";
+import "x/countdown/codec.proto";
 import "x/currency/codec.proto";
 import "x/distribution/codec.proto";
 import "x/escrow/codec.proto";
 import "x/gov/codec.proto";
+import "x/msgfee/codec.proto";
 import "x/multisig/codec.proto";
 import "x/sigs/codec.proto";
 import "x/validators/codec.proto";
@@ -29,11 +31,17 @@ import "x/validators/codec.proto";
 message Tx {
   cash.FeeInfo fees = 1;
   repeated sigs.StdSignature signatures = 2;
-  // ID of a multisig contract.
+  // Multisig contains IDs of multisig contracts.
+  // empty array results in multisig being ignored, basically the same behaviour
+  // as if it never got supplied.
   repeated bytes multisig = 4;
   // msg is a sum type over all allowed messages on this chain.
   oneof sum {
     cash.SendMsg cash_send_msg = 51;
+    countdown.CreateMsg countdown_create_msg = 106;
+    countdown.UpdateMsg countdown_update_msg = 107;
+    countdown.ResetMsg countdown_reset_msg = 108;
+    countdown.GetMsg countdown_get_msg = 111;
     escrow.CreateMsg escrow_create_msg = 52;
     escrow.ReleaseMsg escrow_release_msg = 53;
     escrow.ReturnMsg escrow_return_msg = 54;
@@ -46,6 +54,7 @@ message Tx {
     username.RegisterTokenMsg username_register_token_msg = 61;
     username.TransferTokenMsg username_transfer_token_msg = 62;
     username.ChangeTokenTargetsMsg username_change_token_targets_msg = 63;
+    username.UpdateConfigurationMsg username_update_configuration_msg = 64;
     distribution.CreateMsg distribution_create_msg = 66;
     distribution.DistributeMsg distribution_msg = 67;
     distribution.ResetMsg distribution_reset_msg = 68;
@@ -61,7 +70,7 @@ message Tx {
     gov.UpdateElectorateMsg gov_update_electorate_msg = 77;
     gov.UpdateElectionRuleMsg gov_update_election_rule_msg = 78;
     // 79 is reserved (see ProposalOptions: TextResolutionMsg)
-
+    msgfee.SetMsgFeeMsg msgfee_set_msg_fee_msg = 80;
   }
 }
 
@@ -82,12 +91,13 @@ message ExecuteBatchMsg {
       username.RegisterTokenMsg username_register_token_msg = 61;
       username.TransferTokenMsg username_transfer_token_msg = 62;
       username.ChangeTokenTargetsMsg username_change_token_targets_msg = 63;
+      username.UpdateConfigurationMsg username_update_configuration_msg = 64;
       distribution.CreateMsg distribution_create_msg = 66;
       distribution.DistributeMsg distribution_msg = 67;
       distribution.ResetMsg distribution_reset_msg = 68;
       // upgrade schema is important enough, it should be a solo action
       // aswap and gov don't make much sense as part of a batch (no vote buying)
-
+      msgfee.SetMsgFeeMsg msgfee_set_msg_fee_msg = 80;
     }
   }
   repeated Union messages = 1 [(gogoproto.nullable) = false];
@@ -107,6 +117,7 @@ message ProposalOptions {
     username.RegisterTokenMsg username_register_token_msg = 61;
     username.TransferTokenMsg username_transfer_token_msg = 62;
     username.ChangeTokenTargetsMsg username_change_token_targets_msg = 63;
+    username.UpdateConfigurationMsg username_update_configuration_msg = 64;
     distribution.CreateMsg distribution_create_msg = 66;
     distribution.DistributeMsg distribution_msg = 67;
     distribution.ResetMsg distribution_reset_msg = 68;
@@ -114,6 +125,7 @@ message ProposalOptions {
     gov.UpdateElectorateMsg gov_update_electorate_msg = 77;
     gov.UpdateElectionRuleMsg gov_update_election_rule_msg = 78;
     gov.CreateTextResolutionMsg gov_create_text_resolution_msg = 79;
+    msgfee.SetMsgFeeMsg msgfee_set_msg_fee_msg = 80;
   }
 }
 
@@ -129,6 +141,7 @@ message ExecuteProposalBatchMsg {
       username.RegisterTokenMsg username_register_token_msg = 61;
       username.TransferTokenMsg username_transfer_token_msg = 62;
       username.ChangeTokenTargetsMsg username_change_token_targets_msg = 63;
+      username.UpdateConfigurationMsg username_update_configuration_msg = 64;
       distribution.CreateMsg distribution_create_msg = 66;
       distribution.DistributeMsg distribution_msg = 67;
       distribution.ResetMsg distribution_reset_msg = 68;
@@ -136,6 +149,7 @@ message ExecuteProposalBatchMsg {
       gov.UpdateElectorateMsg gov_update_electorate_msg = 77;
       gov.UpdateElectionRuleMsg gov_update_election_rule_msg = 78;
       gov.CreateTextResolutionMsg gov_create_text_resolution_msg = 79;
+      msgfee.SetMsgFeeMsg msgfee_set_msg_fee_msg = 80;
     }
   }
   repeated Union messages = 1 [(gogoproto.nullable) = false];
@@ -157,6 +171,8 @@ message CronTask {
   repeated bytes authenticators = 1 [(gogoproto.casttype) = "github.com/iov-one/weave.Condition"];
   // Use the same indexes for the messages as the Tx message.
   oneof sum {
+    countdown.ResetMsg countdown_reset_msg = 108;
+    countdown.LineMsg countdown_line_msg = 110;
     escrow.ReleaseMsg escrow_release_msg = 53;
     escrow.ReturnMsg escrow_return_msg = 54;
     distribution.DistributeMsg distribution_distribute_msg = 67;

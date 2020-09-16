@@ -103,20 +103,25 @@ const sequenceBinarySize = 8
 // Size information is required to be able to stream the messages:
 // https://developers.google.com/protocol-buffers/docs/techniques#streaming
 func writeTx(w io.Writer, tx *customd.Tx) (int, error) {
+	fmt.Println(tx)
 	b, err := tx.Marshal()
+	fmt.Println(b)
+	fmt.Println(err)
 	if err != nil {
 		return 0, err
 	}
 
 	var size [txHeaderSize]byte
 	binary.BigEndian.PutUint32(size[:], uint32(len(b)))
-
+	fmt.Println("size is:", size)
 	if n, err := w.Write(size[:]); err != nil {
 		return n, err
 	}
 	if n, err := w.Write(b); err != nil {
 		return n + txHeaderSize, err
 	}
+	fmt.Println("headersize is", txHeaderSize)
+	fmt.Println("len(b)", len(b))
 	return txHeaderSize + len(b), nil
 }
 
@@ -146,6 +151,7 @@ func readTx(r io.Reader) (*customd.Tx, int, error) {
 		return nil, n, err
 	}
 	msgSize := binary.BigEndian.Uint32(size[:])
+	fmt.Println(msgSize)
 	raw := make([]byte, msgSize)
 	if n, err := io.ReadFull(r, raw); err != nil {
 		return nil, n + txHeaderSize, err

@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package countdown;
+
+import "codec.proto";
+import "gogoproto/gogo.proto";
+
+// Write is the instance type held in WriteBucket
+// it is saved with key "processing" until it is running and then with
+// the time of its termination
+message Write {
+  weave.Metadata metadata = 1;
+  string status = 2;
+  // Start of the cron process in Unix - not updated
+  int64 start = 3 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"];
+  // End of the cron in Unix
+  int64 end = 4 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"];
+  // The position in the source until which it is read
+  int64 read = 5;
+  // TaskID of the next scheduled cron event
+  bytes task_id = 6 [(gogoproto.customname) = "TaskID"];
+  // Slice of lines read until now
+  repeated Line lines = 7;
+  // Address of the Write inside the kv
+  bytes address = 8 [(gogoproto.casttype) = "github.com/iov-one/weave.Address"];
+}
+
+// Line is the instance type saved inside LineBucket
+// it is saved with key sequence for every instance inside the kv
+message Line {
+  weave.Metadata metadata = 1;
+  // content of the line from the resource
+  bytes content = 2;
+  // start of the cron process according to which this instance is running - not updated
+  int64 start = 3 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"];
+  // time at which the current line is saved
+  int64 time = 4 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"]; // saved at this time
+  // the position in the source after reading the current content
+  int64 read = 5;
+  // address of the instance in the kv
+  bytes address = 6 [(gogoproto.casttype) = "github.com/iov-one/weave.Address"];
+}
+
+// creates a new Write instance
+message CreateMsg {
+  weave.Metadata metadata = 1;
+  // status is "processing"
+  string status = 2;
+  // start of the cron process - to be sent to Write
+  int64 start = 3 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"];
+  // end of cron - to be sent to Write
+  int64 end = 4 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"];
+  // read position is 0 at create time
+  int64 read = 5;
+  // TaskID is nil at create time
+  bytes task_id = 6 [(gogoproto.customname) = "TaskID"];
+}
+
+// LineMsg create a new line record
+message LineMsg {
+  weave.Metadata metadata = 1;
+  // time of reading the line according to cron schedule - set in Line at saving
+  int64 time = 2 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"];
+  // start of the cron process in Unix according to which this message is sent - not updated
+  int64 start = 3 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"]; // this is the cron start - do not change it
+  // end of the
+  int64 end = 4 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"];
+  // position in the source after which next line should be read
+  int64 read = 5;
+}
+
+// UpdateMsg updates Write status, task_id, time last read and read position
+message UpdateMsg {
+  weave.Metadata metadata = 1;
+  // last read time in Unix
+  int64 time = 2 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"]; // last read time
+  // Current status of the cron - it is "processing"; maybe should be removed
+  string status = 3;
+  // the position until the which the position is read - updates the Write instance
+  int64 read = 4; // read until this position in the source
+  // TaskID of the next cron event
+  bytes task_id = 5 [(gogoproto.customname) = "TaskID"];
+}
+
+// ResetMsg resets cron schedules and ends the write
+message ResetMsg {
+  weave.Metadata metadata = 1;
+  // time of ending the Write process in Unix
+  int64 end = 2 [(gogoproto.casttype) = "github.com/iov-one/weave.UnixTime"];
+  // new status - "terminated" or "finished"
+  string status = 3;
+}
+
+message GetMsg {
+  weave.Metadata metadata = 1;
+  string key = 2;
+  string status = 3;
+}

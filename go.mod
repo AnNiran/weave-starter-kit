@@ -2,7 +2,7 @@ module github.com/iov-one/weave-starter-kit
 
 require (
 	github.com/gogo/protobuf v1.2.1
-	github.com/iov-one/weave v0.25.1
+	github.com/iov-one/weave v0.22.0
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/stellar/go v0.0.0-20190723221356-14eed5a46caf
 	github.com/tendermint/tendermint v0.31.9

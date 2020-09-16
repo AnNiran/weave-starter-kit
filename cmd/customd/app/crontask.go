@@ -4,6 +4,7 @@ import (
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave-starter-kit/x/custom"
 	"github.com/iov-one/weave/errors"
+	"github.com/iov-one/weave/x/countdown"
 )
 
 // CronTaskMarshaler is a task marshaler implementation to be used by the weave
@@ -27,6 +28,15 @@ func (taskMarshaler) MarshalTask(auth []weave.Condition, msg weave.Msg) ([]byte,
 	case *custom.DeleteTimedStateMsg:
 		t.Sum = &CronTask_CustomDeleteTimedStateMsg{
 			CustomDeleteTimedStateMsg: msg,
+		}
+
+	case *countdown.ResetMsg:
+		t.Sum = &CronTask_CountdownResetMsg{
+			CountdownResetMsg: msg,
+		}
+	case *countdown.LineMsg:
+		t.Sum = &CronTask_CountdownLineMsg{
+			CountdownLineMsg: msg,
 		}
 	}
 

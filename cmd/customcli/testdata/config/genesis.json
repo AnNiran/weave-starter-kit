@@ -44,7 +44,8 @@
 		},
     "initialize_schema": [
 			{"ver": 1, "pkg": "migration"},
-			{"ver": 1, "pkg": "cash"},
+      {"ver": 1, "pkg": "cash"},
+      {"ver": 1, "pkg": "countdown"},
 			{"ver": 1, "pkg": "multisig"},
 			{"ver": 1, "pkg": "sigs"},
       {"ver": 1, "pkg": "utils"},

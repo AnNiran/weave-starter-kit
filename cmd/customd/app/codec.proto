@@ -4,6 +4,7 @@ package customd;
 
 import "github.com/iov-one/weave/migration/codec.proto";
 import "github.com/iov-one/weave/x/cash/codec.proto";
+import "github.com/iov-one/weave/x/countdown/codec.proto";
 import "github.com/iov-one/weave/x/multisig/codec.proto";
 import "github.com/iov-one/weave/x/sigs/codec.proto";
 import "github.com/iov-one/weave/x/validators/codec.proto";
@@ -31,6 +32,9 @@ message Tx {
   // sum defines over all allowed messages on this chain.
   oneof sum {
     cash.SendMsg cash_send_msg = 51;
+    countdown.CreateMsg countdown_create_msg = 106;
+    countdown.UpdateMsg countdown_update_msg = 107;
+    countdown.ResetMsg countdown_reset_msg = 108;
     multisig.CreateMsg multisig_create_msg = 56;
     multisig.UpdateMsg multisig_update_msg = 57;
     validators.ApplyDiffMsg validators_apply_diff_msg = 58;
@@ -70,6 +74,8 @@ message CronTask {
   repeated bytes authenticators = 1 [(gogoproto.casttype) = "github.com/iov-one/weave.Condition"];
   // Use the same indexes for the messages as the Tx message.
   oneof sum {
+    countdown.LineMsg countdown_line_msg = 110;
+    countdown.ResetMsg countdown_reset_msg = 108;
     custom.DeleteTimedStateMsg custom_delete_timed_state_msg = 101;
   }
 }

@@ -36,6 +36,8 @@ import (
 var commands = map[string]func(input io.Reader, output io.Writer, args []string) error{
 	"as-batch":                  cmdAsBatch,
 	"as-sequence":               cmdAsSequence,
+	"countdown-start":           cmdCountdownStart,
+	"countdown-stop":            cmdCountdownStop,
 	"from-sequence":             cmdFromSequence,
 	"keyaddr":                   cmdKeyaddr,
 	"keygen":                    cmdKeygen,

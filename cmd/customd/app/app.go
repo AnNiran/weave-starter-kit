@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/iov-one/weave/x/countdown"
+
 	"github.com/iov-one/weave"
 	"github.com/iov-one/weave-starter-kit/x/custom"
 	"github.com/iov-one/weave/app"
@@ -58,6 +60,7 @@ func Router(authFn x.Authenticator, issuer weave.Address) *app.Router {
 	scheduler := cron.NewScheduler(CronTaskMarshaler)
 
 	cash.RegisterRoutes(r, authFn, CashControl())
+	countdown.RegisterRoutes(r, authFn, scheduler)
 	sigs.RegisterRoutes(r, authFn)
 	multisig.RegisterRoutes(r, authFn)
 	migration.RegisterRoutes(r, authFn)
@@ -72,6 +75,7 @@ func QueryRouter() weave.QueryRouter {
 	r := weave.NewQueryRouter()
 	r.RegisterAll(
 		cash.RegisterQuery,
+		countdown.RegisterQuery,
 		sigs.RegisterQuery,
 		multisig.RegisterQuery,
 		migration.RegisterQuery,
@@ -101,6 +105,7 @@ func CronStack() weave.Handler {
 
 	// Cron is using custom router as not the same handlers are registered.
 	custom.RegisterCronRoutes(rt, authFn)
+	countdown.RegisterCronRoutes(rt, authFn)
 
 	decorators := app.ChainDecorators(
 		utils.NewLogging(),

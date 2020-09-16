@@ -14,6 +14,7 @@ import (
 	"github.com/iov-one/weave/crypto"
 	"github.com/iov-one/weave/migration"
 	"github.com/iov-one/weave/x/cash"
+	"github.com/iov-one/weave/x/countdown"
 	"github.com/iov-one/weave/x/multisig"
 	"github.com/iov-one/weave/x/validators"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -80,6 +81,7 @@ func GenInitOptions(args []string) (json.RawMessage, error) {
 		},
 		"initialize_schema": []dict{
 			{"pkg": "migration", "ver": 1},
+			{"pkg": "countdown", "ver": 1},
 			{"pkg": "custom", "ver": 1},
 			{"pkg": "cash", "ver": 1},
 			{"pkg": "sigs", "ver": 1},
@@ -112,6 +114,7 @@ func DecorateApp(application app.BaseApp, logger log.Logger) app.BaseApp {
 	application.WithInit(app.ChainInitializers(
 		&migration.Initializer{},
 		&cash.Initializer{},
+		&countdown.Initializer{},
 		&multisig.Initializer{},
 		&validators.Initializer{},
 	))
